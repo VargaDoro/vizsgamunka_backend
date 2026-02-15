@@ -20,7 +20,12 @@ class AuthController extends ApiController
         }
 
         $token = $user->createToken($user->role)->plainTextToken;
-        return $this->successResponse(['token' => $token]);
+
+        return response()->json([
+            'access_token' => $token,
+            'user' => $user
+        ]);
+
     }
 
     public function logout(Request $request)
