@@ -25,3 +25,72 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
 //Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+
+
+//////////////////////////      ÁTNÉZENDŐ     //////////////////////////////////
+Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
+
+    // Felhasználók CRUD
+    Route::apiResource('users', UserController::class);
+
+    // Orvosok kezelése
+    Route::apiResource('doctors', DoctorController::class);
+
+    // Páciensek kezelése
+    Route::apiResource('patients', PatientController::class);
+
+    // Időpontok kezelése
+    Route::apiResource('appointments', AppointmentController::class);
+
+    // Dokumentumok kezelése
+    Route::apiResource('documents', DocumentController::class);
+
+    // Dokumentumtípusok kezelése
+    Route::apiResource('document-types', DocumentTypeController::class);
+
+    // Receptek kezelése
+    Route::apiResource('prescriptions', PrescriptionController::class);
+
+    // Rendelőhelyek kezelése
+    Route::apiResource('office-locations', OfficeLocationController::class);
+
+});
+
+
+ //6.4 Páciens-specifikus végpontok
+
+
+Route::middleware(['auth:sanctum', PatientMW::class])->group(function () {
+
+    // Saját időpontok
+    Route::get('/appointments', [AppointmentController::class, 'index']);
+
+    // Időpont foglalása
+    Route::post('/appointments', [AppointmentController::class, 'store']);
+
+    // Saját időpont törlése
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
+
+    // Saját dokumentumok
+    Route::get('/documents', [DocumentController::class, 'index']);
+
+    // Saját receptek
+    Route::get('/prescriptions', [PrescriptionController::class, 'index']);
+});
+
+
+// 6.5 Orvos-specifikus végpontok
+
+Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
+
+    // Saját páciensek időpontjai
+    Route::get('/appointments', [AppointmentController::class, 'index']);
+
+    // Dokumentum feltöltés pácienshez
+    Route::post('/documents', [DocumentController::class, 'store']);
+
+    // Recept felírása
+    Route::post('/prescriptions', [PrescriptionController::class, 'store']);
+});
+
