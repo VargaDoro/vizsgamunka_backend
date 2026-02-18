@@ -44,11 +44,12 @@ Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
 
+//ha jol ertem akk kulon group-okba kell rakni minden kulon jogosultsagu felhasznalo szamara elerheto utvonalakat??
 
-//////////////////////////      ÁTNÉZENDŐ     //////////////////////////////////
+//////////////////////////      ÁTNÉZENDŐ     ////////////////////////////////// 
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
 
-    // Felhasználók CRUD
+    // Felhasználók CRUD            //crud az mi??
     Route::apiResource('users', UserController::class);
 
     // Orvosok kezelése
