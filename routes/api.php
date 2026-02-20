@@ -1,10 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Doctor\AppointmentController;
+use App\Http\Controllers\Doctor\DocumentController;
+use App\Http\Controllers\Doctor\PrescriptionController;
+use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentController;
+use App\Http\Controllers\Patient\DocumentController as PatientDocumentController;
+use App\Http\Controllers\Patient\PatientController as PatientPatientController;
+use App\Http\Controllers\Patient\PrescriptionController as PatientPrescriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AdminMW;
+use App\Http\Middleware\DoctorMW;
+use App\Http\Middleware\PatientMW;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,7 +59,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 //////////////////////////      ÁTNÉZENDŐ     ////////////////////////////////// 
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
 
-    // Felhasználók CRUD            //crud az mi??
+    // Felhasználók CRUD            //crud az mi?? Ez automatikusan létrehozza ezeket az API végpontokat
     Route::apiResource('users', UserController::class);
 
     // Orvosok kezelése
@@ -58,7 +68,7 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     // Páciensek kezelése
     Route::apiResource('patients', PatientController::class);
 
-    // Időpontok kezelése
+/*    // Időpontok kezelése
     Route::apiResource('appointments', AppointmentController::class);
 
     // Dokumentumok kezelése
@@ -69,6 +79,7 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
 
     // Receptek kezelése
     Route::apiResource('prescriptions', PrescriptionController::class);
+    NEMSZABAD!*/
 
     // Rendelőhelyek kezelése
     Route::apiResource('office-locations', OfficeLocationController::class);
@@ -101,6 +112,9 @@ Route::middleware(['auth:sanctum', PatientMW::class])->group(function () {
 // 6.5 Orvos-specifikus végpontok
 
 Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
+    
+    // Páciensek kezelése
+    Route::apiResource('patients', PatientController::class);
 
     // Saját páciensek időpontjai
     Route::get('/appointments', [AppointmentController::class, 'index']);
@@ -112,3 +126,18 @@ Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
     Route::post('/prescriptions', [PrescriptionController::class, 'store']);
 });
 
+Route::prefix('admin')->middleware(['auth:sanctum', AdminMW::class])->group(function () {
+    Route::apiResource('users', AdminUserController::class);
+    Route::apiResource('patients', AdminPatientController::class);
+});
+
+Route::prefix('doctor')->middleware(['auth:sanctum', DoctorMW::class])->group(function () {
+    Route::apiResource('patients', DoctorPatientController::class);
+    Route::get('appointments', [DoctorAppointmentController::class, 'index']);
+    Route::post('documents', [DoctorDocumentController::class, 'store']);
+});
+
+Route::prefix('patient')->middleware(['auth:sanctum', PatientMW::class])->group(function () {
+    Route::get('appointments', [PatientAppointmentController::class, 'index']);
+    Route::post('appointments', [PatientAppointmentController::class, 'store']);
+});
