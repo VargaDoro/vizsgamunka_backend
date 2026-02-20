@@ -8,36 +8,18 @@ use App\Http\Middleware\AdminMW;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-//autentikált végpontok
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/profile', [UserController::class, 'show_auth']);
-    // Kijelentkezés útvonal
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/profile', function (Request $request) {
+        return $request->user()->load([
+            'doctorAppointments.doctor',
+            'patientAppointments.patient'
+        ]);
+    });
+
 });
 
-Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
-    $user = $request->user()->load([
-        'doctorAppointments.doctor',  
-        'patientAppointments.patient'  
-    ]);
-    return response()->json($user);
-});
-
-//admin végpontok
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
-});
-
-Route::get('/set-cookie', [UserController::class, 'setCookie']);
-Route::get('/read-cookie', [UserController::class, 'readCookie']);
-Route::get('/delete-cookie', [UserController::class, 'deleteCookie']);
-//bárki által hozzáférhető útvonal
-//Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [RegisteredUserController::class, 'store']);
-
-Route::post('/login', [AuthController::class, 'login']); // tokenes login
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
-Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
-    return $request->user();
 });
