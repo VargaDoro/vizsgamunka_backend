@@ -114,6 +114,26 @@ Route::middleware(['auth:sanctum', PatientMW::class])->group(function () {
     Route::get('/prescriptions', [PrescriptionController::class, 'index']);
 });
 
+////PATIENT bővítése
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/profile', [UserController::class, 'show_auth']);
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
+
+    // Bejelentkezett páciens saját adatai (PatientHomePage-nek)
+    Route::get('/patient/me', [PatientController::class, 'me']);
+
+    // Páciens időpontjai + foglalás
+    Route::get('/appointments/me', [AppointmentController::class, 'myAppointments']);
+    Route::post('/appointments', [AppointmentController::class, 'store']);
+    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'cancel']);
+
+    // Páciens dokumentumai
+    Route::get('/documents/me', [DocumentController::class, 'myDocuments']);
+    Route::get('/documents/{document}', [DocumentController::class, 'show']);
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
+});
+
+
 
 // 6.5 Orvos-specifikus végpontok
 
