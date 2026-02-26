@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Doctor\AppointmentController;
-use App\Http\Controllers\Doctor\DocumentController;
+//use App\Http\Controllers\Doctor\AppointmentController;
+//use App\Http\Controllers\Doctor\DocumentController;
 use App\Http\Controllers\Doctor\PrescriptionController;
+use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
 use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentController;
 use App\Http\Controllers\Patient\DocumentController as PatientDocumentController;
+use App\Http\Controllers\Admin\PatientController as AdminPatientController;
 use App\Http\Controllers\Patient\PatientController as PatientPatientController;
 use App\Http\Controllers\Patient\PrescriptionController as PatientPrescriptionController;
 use App\Http\Controllers\UserController;
@@ -16,12 +17,11 @@ use App\Http\Middleware\AdminMW;
 use App\Http\Middleware\DoctorMW;
 use App\Http\Middleware\PatientMW;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 
 
-use App\Http\Controllers\PatientController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\DocumentController;
+
 
 
 //autentikált végpontok
@@ -69,10 +69,13 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::apiResource('users', UserController::class);
 
     // Orvosok kezelése
-    Route::apiResource('doctors', DoctorController::class);
+    //Route::apiResource('doctors', DoctorController::class);
+    Route::apiResource('doctors', AdminDoctorController::class);
+    
 
     // Páciensek kezelése
-    Route::apiResource('patients', PatientController::class);
+    //Route::apiResource('patients', PatientController::class);
+    Route::apiResource('patients', AdminPatientController::class)
 
 /*    // Időpontok kezelése
     Route::apiResource('appointments', AppointmentController::class);
@@ -92,7 +95,7 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
 
 });
 
-
+/* TÖRLÉS???
  //6.4 Páciens-specifikus végpontok
 
 
@@ -133,7 +136,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
 });
 
-
+*/
 
 // 6.5 Orvos-specifikus végpontok
 
@@ -162,8 +165,25 @@ Route::prefix('doctor')->middleware(['auth:sanctum', DoctorMW::class])->group(fu
     Route::get('appointments', [DoctorAppointmentController::class, 'index']);
     Route::post('documents', [DoctorDocumentController::class, 'store']);
 });
+// Ezt bővítem a többit patient specifikus megoldást törlöm
+Route::prefix('patient')
+    ->middleware(['auth:sanctum', PatientMW::class])
+    ->group(function () {
 
-Route::prefix('patient')->middleware(['auth:sanctum', PatientMW::class])->group(function () {
-    Route::get('appointments', [PatientAppointmentController::class, 'index']);
-    Route::post('appointments', [PatientAppointmentController::class, 'store']);
-});
+        // Bejelentkezett páciens saját adatai
+        Route::get('me', [PatientPatientController::class, 'me']);
+        // (ez felel meg a korábbi /patient/me-nek, csak most szép prefix alatt)
+
+        // Saját időpontok
+        Route::get('appointments', [PatientAppointmentController::class, 'index']);   // myAppointments
+        Route::post('appointments', [PatientAppointmentController::class, 'store']); // foglalás
+        Route::delete('appointments/{id}', [PatientAppointmentController::class, 'destroy']); // törlés
+
+        // Saját dokumentumok
+        Route::get('documents', [PatientDocumentController::class, 'index']); // myDocuments
+        Route::get('documents/{document}', [PatientDocumentController::class, 'show']);
+        Route::get('documents/{document}/download', [PatientDocumentController::class, 'download']);
+
+        // Saját receptek
+        Route::get('prescriptions', [PatientPrescriptionController::class, 'index']);
+    });
