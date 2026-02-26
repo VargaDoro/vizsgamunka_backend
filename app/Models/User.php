@@ -48,13 +48,19 @@ class User extends Authenticatable
     }
 
     public function isAdmin()  {
-        return $this->role === 0;
-    }
-
-    public function isUser()  {
-        return $this->role === 1;
+        return $this->role === 'admin';
     }
     
+    public function isPatient()
+    {
+        return $this->role === 'patient';
+    }
+
+    public function isDoctor()
+    {
+        return $this->role === 'doctor';
+    }
+
     public function doctor()
     {
         return $this->hasOne(Doctor::class);
@@ -63,5 +69,15 @@ class User extends Authenticatable
     public function patient()
     {
         return $this->hasOne(Patient::class);
+    }
+
+    public function doctorAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id', 'id');
+    }
+
+    public function patientAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'patient_id', 'id');
     }
 }

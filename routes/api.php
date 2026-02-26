@@ -1,10 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Doctor\AppointmentController;
+use App\Http\Controllers\Doctor\DocumentController;
+use App\Http\Controllers\Doctor\PrescriptionController;
+use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentController;
+use App\Http\Controllers\Patient\DocumentController as PatientDocumentController;
+use App\Http\Controllers\Patient\PatientController as PatientPatientController;
+use App\Http\Controllers\Patient\PrescriptionController as PatientPrescriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AdminMW;
+use App\Http\Middleware\DoctorMW;
+use App\Http\Middleware\PatientMW;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,29 +31,119 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 });
 
+Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
+    $user = $request->user()->load([
+        'doctorAppointments.doctor',  
+        'patientAppointments.patient'  
+    ]);
+    return response()->json($user);
+});
+
 //admin végpontok
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
 });
 
+Route::get('/set-cookie', [UserController::class, 'setCookie']);
+Route::get('/read-cookie', [UserController::class, 'readCookie']);
+Route::get('/delete-cookie', [UserController::class, 'deleteCookie']);
 //bárki által hozzáférhető útvonal
 //Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [RegisteredUserController::class, 'store']);
+
+Route::post('/login', [AuthController::class, 'login']); // tokenes login
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
+    return $request->user();
+});
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 
-/////PATIENT////
 
-// Bejelentkezett páciens saját adatai (PatientHomePage-nek)
-    Route::get('/patient/me', [PatientController::class, 'me']);
+//ha jol ertem akk kulon group-okba kell rakni minden kulon jogosultsagu felhasznalo szamara elerheto utvonalakat??
 
-    // Páciens időpontjai + foglalás
-    Route::get('/appointments/me', [AppointmentController::class, 'myAppointments']);
+//////////////////////////      ÁTNÉZENDŐ     ////////////////////////////////// 
+Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
+
+    // Felhasználók CRUD            //crud az mi?? Ez automatikusan létrehozza ezeket az API végpontokat
+    Route::apiResource('users', UserController::class);
+
+    // Orvosok kezelése
+    Route::apiResource('doctors', DoctorController::class);
+
+    // Páciensek kezelése
+    Route::apiResource('patients', PatientController::class);
+
+/*    // Időpontok kezelése
+    Route::apiResource('appointments', AppointmentController::class);
+
+    // Dokumentumok kezelése
+    Route::apiResource('documents', DocumentController::class);
+
+    // Dokumentumtípusok kezelése
+    Route::apiResource('document-types', DocumentTypeController::class);
+
+    // Receptek kezelése
+    Route::apiResource('prescriptions', PrescriptionController::class);
+    NEMSZABAD!*/
+
+    // Rendelőhelyek kezelése
+    Route::apiResource('office-locations', OfficeLocationController::class);
+
+});
+
+
+ //6.4 Páciens-specifikus végpontok
+
+
+Route::middleware(['auth:sanctum', PatientMW::class])->group(function () {
+
+    // Saját időpontok
+    Route::get('/appointments', [AppointmentController::class, 'index']);
+
+    // Időpont foglalása
     Route::post('/appointments', [AppointmentController::class, 'store']);
-    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'cancel']);
 
-    // Páciens dokumentumai
-    Route::get('/documents/me', [DocumentController::class, 'myDocuments']);
-    Route::get('/documents/{document}', [DocumentController::class, 'show']);
-    Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
+    // Saját időpont törlése
+    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
 
+    // Saját dokumentumok
+    Route::get('/documents', [DocumentController::class, 'index']);
+
+    // Saját receptek
+    Route::get('/prescriptions', [PrescriptionController::class, 'index']);
+});
+
+
+// 6.5 Orvos-specifikus végpontok
+
+Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
+    
+    // Páciensek kezelése
+    Route::apiResource('patients', PatientController::class);
+
+    // Saját páciensek időpontjai
+    Route::get('/appointments', [AppointmentController::class, 'index']);
+
+    // Dokumentum feltöltés pácienshez
+    Route::post('/documents', [DocumentController::class, 'store']);
+
+    // Recept felírása
+    Route::post('/prescriptions', [PrescriptionController::class, 'store']);
+});
+
+Route::prefix('admin')->middleware(['auth:sanctum', AdminMW::class])->group(function () {
+    Route::apiResource('users', AdminUserController::class);
+    Route::apiResource('patients', AdminPatientController::class);
+});
+
+Route::prefix('doctor')->middleware(['auth:sanctum', DoctorMW::class])->group(function () {
+    Route::apiResource('patients', DoctorPatientController::class);
+    Route::get('appointments', [DoctorAppointmentController::class, 'index']);
+    Route::post('documents', [DoctorDocumentController::class, 'store']);
+});
+
+Route::prefix('patient')->middleware(['auth:sanctum', PatientMW::class])->group(function () {
+    Route::get('appointments', [PatientAppointmentController::class, 'index']);
+    Route::post('appointments', [PatientAppointmentController::class, 'store']);
+});
