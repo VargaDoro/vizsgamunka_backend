@@ -14,16 +14,10 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('doctor_id')
+            $table->foreignId('user_id')
                 ->references('user_id')
-                ->on('doctors')
+                ->on('users')
                 ->onDelete('cascade');
-
-            $table->foreignId('patient_id')
-                ->references('user_id')
-                ->on('patients')
-                ->onDelete('cascade');
-
             $table->dateTime('appointment_time');
             $table->string('status');
 
