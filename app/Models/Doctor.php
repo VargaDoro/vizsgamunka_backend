@@ -25,7 +25,7 @@ class Doctor extends Model
 
     public function officeLocation()
     {
-        return $this->belongsTo(OfficeLocation::class);
+        return $this->belongsTo(Office_localation::class);
     }
 
 }

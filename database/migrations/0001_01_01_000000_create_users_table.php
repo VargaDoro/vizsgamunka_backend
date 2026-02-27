@@ -13,7 +13,18 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            //$table->unsignedBigInteger('user_id')->primary();     v ez legyen?
+            $table->string('name', 100);
+            $table->string('social_security_number', 20)->unique(); //orvosnak is kell legyen!!!(a verifynumberén kívül!!!)
+            $table->date('birth_date');//orvosnak is kell legyen!!!
+            $table->string('country', 100)->nullable();//orvosnak is kell legyen!!!
+            $table->string('city', 100)->nullable();//orvosnak is kell legyen!!!
+            $table->string('postal_code', 20)->nullable();//orvosnak is kell legyen!!!
+            $table->string('street_address', 200)->nullable();//orvosnak is kell legyen!!!
+            $table->string('phone_number', 20)->nullable();//orvosnak is kell legyen!!!
+            $table->string('license_number', 50)->unique(); //CSAK ORVOSS
+            $table->string('specialization', 100);  //CSAK ORVOSS
+            $table->unsignedBigInteger('office_location_id')->nullable(); //CSAK ORVOSS
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
