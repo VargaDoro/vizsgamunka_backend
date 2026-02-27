@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             
-            $table->unsignedBigInteger('user_id')->primary();
+            $table->unsignedBigInteger('id')->primary();
             $table->string('name', 100);
             $table->string('social_security_number', 20)->unique(); //orvosnak is kell legyen!!!(a verifynumberén kívül!!!)
             $table->date('birth_date');//orvosnak is kell legyen!!!
@@ -41,7 +41,7 @@ return new class extends Migration
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->foreignId('id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

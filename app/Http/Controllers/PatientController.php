@@ -65,14 +65,14 @@ class PatientController extends Controller
     public function adminStore(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'id' => 'required|exists:users,id',
         ]);
 
         $patient = Patient::create($validated);
 
         return response()->json([
             'id' => $patient->id,
-            'user_id' => $patient->user_id,
+            'id' => $patient->id,
             'created_at' => $patient->created_at,
         ], 200);
     }
@@ -97,14 +97,14 @@ class PatientController extends Controller
         $patient = Patient::findOrFail($id);
 
         $validated = $request->validate([
-            'user_id' => 'sometimes|exists:users,id',
+            'id' => 'sometimes|exists:users,id',
         ]);
 
         $patient->update($validated);
 
         return response()->json([
             'id' => $patient->id,
-            'user_id' => $patient->user_id,
+            'id' => $patient->id,
             'updated_at' => $patient->updated_at,
         ]);
     }
@@ -120,7 +120,7 @@ class PatientController extends Controller
     ///////////////////////////////main branchből patient
     public function patientShowAuth()
     {
-        $patient = Patient::with('user:id,name,email,phone')->where('user_id', Auth::id())->firstOrFail();
+        $patient = Patient::with('user:id,name,email,phone')->where('id', Auth::id())->firstOrFail();
 
         return response()->json([
             'id' => $patient->id,
@@ -134,7 +134,7 @@ class PatientController extends Controller
 
     public function patientUpdateAuth(Request $request)
     {
-        $patient = Patient::where('user_id', Auth::id())->firstOrFail();
+        $patient = Patient::where('id', Auth::id())->firstOrFail();
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
