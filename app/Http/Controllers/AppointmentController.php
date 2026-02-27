@@ -41,4 +41,57 @@ class AppointmentController extends Controller
         $appointment->delete();
         return response()->json(null, 200);
     }
+/////////////////////// main branchből Doctor
+     public function doctorIndex()
+    {
+        $doctorId = Auth::id();
+        $appointments = Appointment::with('patient:id,name,email')
+            ->where('doctor_id', $doctorId)
+            ->get()
+            ->map(function($appt){
+                return [
+                    'id' => $appt->id,
+                    'patient_name' => $appt->patient->name,
+                    'scheduled_at' => $appt->scheduled_at,
+                    'status' => $appt->status,
+                ];
+            });
+
+        return response()->json($appointments);
+    }
+
+     public function doctorStore(Request $request)
+    {
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'scheduled_at' => 'required|date',
+            'status' => 'nullable|string',
+        ]);
+
+        $appointment = Appointment::create([
+            'doctor_id' => Auth::id(),
+            'patient_id' => $validated['patient_id'],
+            'scheduled_at' => $validated['scheduled_at'],
+            'status' => $validated['status'] ?? 'scheduled',
+        ]);
+
+        return response()->json($appointment, 201);
+    }
+
+     public function doctorShow($id)
+    {
+        $doctorId = Auth::id();
+        $appointment = Appointment::with('patient:id,name,email')
+            ->where('doctor_id', $doctorId)
+            ->findOrFail($id);
+
+        return response()->json([
+            'id' => $appointment->id,
+            'patient_name' => $appointment->patient->name,
+            'scheduled_at' => $appointment->scheduled_at,
+            'status' => $appointment->status,
+        ]);
+    }
+
+
 }
