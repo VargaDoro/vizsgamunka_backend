@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Document extends Model
 {
     use HasFactory;
+
+    //public $timestamps = false; ?????????????????? kell? mert a main branch-ben van ez az 1 sor plusz még eszti rakta bele, vmilyen hibara ai ezt dobta
+
     protected $fillable = [
         'patient_id',
         'doctor_id',

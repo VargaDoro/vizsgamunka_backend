@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Patient extends Model
 {
+    protected $primaryKey = 'user_id';   //ELOQUENTNEK MEGMONDJUK
+    public $incrementing = false;        // mert nem auto-increment
+    protected $keyType = 'int';
+    public $timestamps = false;          // mert a migrációban nincs created_at/updated_at
+
     /** @use HasFactory<\Database\Factories\PatientFactory> */
     use HasFactory;
     protected $fillable = [
