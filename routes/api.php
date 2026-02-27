@@ -9,6 +9,7 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AdminMW;
+use App\Http\Middleware\DoctorMW;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
