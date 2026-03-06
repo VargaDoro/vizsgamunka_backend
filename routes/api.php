@@ -26,10 +26,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-// Betegnek szóló csoport (orvosok kilistázása funkcióhoz)
+// Betegnek szóló csoport
 Route::middleware(['auth:sanctum', PatientMW::class])
     ->group(function () {
+        //orvosok kilistázása funkcióhoz
         Route::get('/doctors', [DoctorController::class, 'index']);
+        //csak egy orvos listázása
+        Route::get('/doctors/{id}', [DoctorController::class, 'show']);
     });
 
 // Admin funkciók

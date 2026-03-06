@@ -43,9 +43,19 @@ class DoctorController extends Controller
         return response()->json($doctor, 200);
     }
 
-    public function show(string $id)
+
+    public function show($id)
     {
-        return Doctor::with(['user', 'officeLocation'])->findOrFail($id);
+        $doctor = User::where('role', 'doctor')->findOrFail($id);
+
+        return response()->json([
+            'id' => $doctor->id,
+            'name' => $doctor->name,
+            'email' => $doctor->email,
+            'specialization' => $doctor->specialization,
+            'office_location' => $doctor->office_location,
+            'phone_number' => $doctor->phone_number,
+        ]);
     }
 
     public function update(UpdateDoctorRequest $request, string $id)
