@@ -11,6 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->id(); // ez auto increment
+
+            $table->string('name', 100);
+            $table->string('social_security_number', 20)->nullable()->unique();
+            $table->date('birth_date')->nullable();
+            $table->string('country', 100)->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('postal_code', 20)->nullable();
+            $table->string('street_address', 200)->nullable();
+            $table->string('phone_number', 20)->nullable();
+
+            $table->string('license_number', 50)->nullable()->unique();
+            $table->string('specialization', 100)->nullable();
+            $table->unsignedBigInteger('office_location_id')->nullable();
+
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->enum('role', ['admin', 'patient', 'doctor'])->default('patient');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+        /*
         Schema::create('users', function (Blueprint $table) {
             
             $table->unsignedBigInteger('id')->primary();
@@ -32,6 +57,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
+        */
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

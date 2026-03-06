@@ -12,6 +12,7 @@ use App\Http\Middleware\AdminMW;
 use App\Http\Middleware\DoctorMW;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DoctorController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -22,7 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
     });
 
+
 });
+    // Orvosok listázása:
+    Route::get('/doctors', [DoctorController::class, 'index']);
 
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
@@ -39,7 +43,7 @@ Route::middleware(['auth:sanctum', DoctorMW::class])
         // Dokumentum feltöltés
         Route::post('/documents', [DocumentController::class, 'doctorStore']);
         // Időpont CRUD
-        Route::get('appointments', [AppointmentController::class, 'doctorIndex']);//post,put,delete
+        Route::get('appointments', [AppointmentController::class, 'doctorIndex']); //post,put,delete
         // Recept CRUD
-        Route::apiResource('prescriptions', PrescriptionController::class);//get,post,put,delete külön doctor...
+        Route::apiResource('prescriptions', PrescriptionController::class); //get,post,put,delete külön doctor...
     });
