@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Appointment;
 
 class User extends Authenticatable
 {
@@ -47,10 +48,11 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin()  {
+    public function isAdmin()
+    {
         return $this->role === 'admin';
     }
-    
+
     public function isPatient()
     {
         return $this->role === 'patient';
@@ -60,7 +62,7 @@ class User extends Authenticatable
     {
         return $this->role === 'doctor';
     }
-    
+
 
 
     public function doctorAppointments()
@@ -74,7 +76,9 @@ class User extends Authenticatable
     }
 
     public function officeLocation()
-{
-    return $this->belongsTo(OfficeLocation::class, 'office_location_id');
-}
+    {
+        return $this->belongsTo(OfficeLocation::class, 'office_location_id');
+    }
+
+    
 }
