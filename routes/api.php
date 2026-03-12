@@ -1,189 +1,49 @@
 <?php
 
+use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\AuthController;
-//use App\Http\Controllers\Doctor\AppointmentController;
-//use App\Http\Controllers\Doctor\DocumentController;
-use App\Http\Controllers\Doctor\PrescriptionController;
-use App\Http\Controllers\Admin\DoctorController as AdminDoctorController;
-use App\Http\Controllers\Patient\AppointmentController as PatientAppointmentController;
-use App\Http\Controllers\Patient\DocumentController as PatientDocumentController;
-use App\Http\Controllers\Admin\PatientController as AdminPatientController;
-use App\Http\Controllers\Patient\PatientController as PatientPatientController;
-use App\Http\Controllers\Patient\PrescriptionController as PatientPrescriptionController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\AdminMW;
 use App\Http\Middleware\DoctorMW;
-use App\Http\Middleware\PatientMW;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DoctorController;
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/profile', function (Request $request) {
+        return $request->user()->load([
+            'doctorAppointments.doctor',
+            'patientAppointments.patient'
+        ]);
+    });
 
 
-
-
-
-//autentikált végpontok
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/profile', [UserController::class, 'show_auth']);
-    // Kijelentkezés útvonal
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
 });
+    // Orvosok listázása:
+    Route::get('/doctors', [DoctorController::class, 'index']);
 
-Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
-    $user = $request->user()->load([
-        'doctorAppointments.doctor',  
-        'patientAppointments.patient'  
-    ]);
-    return response()->json($user);
-});
-
-//admin végpontok
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
 });
 
-Route::get('/set-cookie', [UserController::class, 'setCookie']);
-Route::get('/read-cookie', [UserController::class, 'readCookie']);
-Route::get('/delete-cookie', [UserController::class, 'deleteCookie']);
-//bárki által hozzáférhető útvonal
-//Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [RegisteredUserController::class, 'store']);
-
-Route::post('/login', [AuthController::class, 'login']); // tokenes login
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
-Route::middleware('auth:sanctum')->get('/profile', function (Request $request) {
-    return $request->user();
-});
-Route::post('/login', [AuthenticatedSessionController::class, 'store']);
-
-
-//ha jol ertem akk kulon group-okba kell rakni minden kulon jogosultsagu felhasznalo szamara elerheto utvonalakat??
-
-//////////////////////////      ÁTNÉZENDŐ     ////////////////////////////////// 
-Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
-
-    // Felhasználók CRUD            //crud az mi?? Ez automatikusan létrehozza ezeket az API végpontokat
-    Route::apiResource('users', UserController::class);
-
-    // Orvosok kezelése
-    //Route::apiResource('doctors', DoctorController::class);
-    Route::apiResource('doctors', AdminDoctorController::class);
-    
-
-    // Páciensek kezelése
-    //Route::apiResource('patients', PatientController::class);
-    Route::apiResource('patients', AdminPatientController::class)
-
-/*    // Időpontok kezelése
-    Route::apiResource('appointments', AppointmentController::class);
-
-    // Dokumentumok kezelése
-    Route::apiResource('documents', DocumentController::class);
-
-    // Dokumentumtípusok kezelése
-    Route::apiResource('document-types', DocumentTypeController::class);
-
-    // Receptek kezelése
-    Route::apiResource('prescriptions', PrescriptionController::class);
-    NEMSZABAD!*/
-
-    // Rendelőhelyek kezelése
-    Route::apiResource('office-locations', OfficeLocationController::class);
-
-});
-
-/* TÖRLÉS???
- //6.4 Páciens-specifikus végpontok
-
-
-Route::middleware(['auth:sanctum', PatientMW::class])->group(function () {
-
-    // Saját időpontok
-    Route::get('/appointments', [AppointmentController::class, 'index']);
-
-    // Időpont foglalása
-    Route::post('/appointments', [AppointmentController::class, 'store']);
-
-    // Saját időpont törlése
-    Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
-
-    // Saját dokumentumok
-    Route::get('/documents', [DocumentController::class, 'index']);
-
-    // Saját receptek
-    Route::get('/prescriptions', [PrescriptionController::class, 'index']);
-});
-
-////PATIENT bővítése
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/profile', [UserController::class, 'show_auth']);
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
-
-    // Bejelentkezett páciens saját adatai (PatientHomePage-nek)
-    Route::get('/patient/me', [PatientController::class, 'me']);
-
-    // Páciens időpontjai + foglalás
-    Route::get('/appointments/me', [AppointmentController::class, 'myAppointments']);
-    Route::post('/appointments', [AppointmentController::class, 'store']);
-    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'cancel']);
-
-    // Páciens dokumentumai
-    Route::get('/documents/me', [DocumentController::class, 'myDocuments']);
-    Route::get('/documents/{document}', [DocumentController::class, 'show']);
-    Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
-});
-
-*/
-
-// 6.5 Orvos-specifikus végpontok
-
-Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
-    
-    // Páciensek kezelése
-    Route::apiResource('patients', PatientController::class);
-
-    // Saját páciensek időpontjai
-    Route::get('/appointments', [AppointmentController::class, 'index']);
-
-    // Dokumentum feltöltés pácienshez
-    Route::post('/documents', [DocumentController::class, 'store']);
-
-    // Recept felírása
-    Route::post('/prescriptions', [PrescriptionController::class, 'store']);
-});
-
-Route::prefix('admin')->middleware(['auth:sanctum', AdminMW::class])->group(function () {
-    Route::apiResource('users', AdminUserController::class);
-    Route::apiResource('patients', AdminPatientController::class);
-});
-
-Route::prefix('doctor')->middleware(['auth:sanctum', DoctorMW::class])->group(function () {
-    Route::apiResource('patients', DoctorPatientController::class);
-    Route::get('appointments', [DoctorAppointmentController::class, 'index']);
-    Route::post('documents', [DoctorDocumentController::class, 'store']);
-});
-// Ezt bővítem a többit patient specifikus megoldást törlöm
-Route::prefix('patient')
-    ->middleware(['auth:sanctum', PatientMW::class])
+Route::middleware(['auth:sanctum', DoctorMW::class])
+    ->prefix('doctor')
     ->group(function () {
-
-        // Bejelentkezett páciens saját adatai
-        Route::get('me', [PatientPatientController::class, 'me']);
-        // (ez felel meg a korábbi /patient/me-nek, csak most szép prefix alatt)
-
-        // Saját időpontok
-        Route::get('appointments', [PatientAppointmentController::class, 'index']);   // myAppointments
-        Route::post('appointments', [PatientAppointmentController::class, 'store']); // foglalás
-        Route::delete('appointments/{id}', [PatientAppointmentController::class, 'destroy']); // törlés
-
-        // Saját dokumentumok
-        Route::get('documents', [PatientDocumentController::class, 'index']); // myDocuments
-        Route::get('documents/{document}', [PatientDocumentController::class, 'show']);
-        Route::get('documents/{document}/download', [PatientDocumentController::class, 'download']);
-
-        // Saját receptek
-        Route::get('prescriptions', [PatientPrescriptionController::class, 'index']);
+        // Saját páciensek listázása
+        Route::get('/patients', [PatientController::class, 'doctorIndex']);
+        // Egy páciens lekérdezése
+        Route::get('/patients/{patient_id}', [PatientController::class, 'doctorShow']);
+        // Dokumentum feltöltés
+        Route::post('/documents', [DocumentController::class, 'doctorStore']);
+        // Időpont CRUD
+        Route::get('appointments', [AppointmentController::class, 'doctorIndex']); //post,put,delete
+        // Recept CRUD
+        Route::apiResource('prescriptions', PrescriptionController::class); //get,post,put,delete külön doctor...
     });

@@ -5,14 +5,35 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
+use App\Models\User;
 
 class DoctorController extends Controller
 {
+    /*
     public function index()
     {
         $doctors = Doctor::with(['user', 'officeLocation'])->get();
         return response()->json($doctors);
     }
+        */
+
+    public function index()
+    {
+        // Csak a doctors szerepkörű userek listája
+        $doctors = User::where('role', 'doctor')
+            ->select([
+                'id',
+                'name',
+                'email',
+                'phone_number',
+                'specialization',
+                'office_location_id',
+            ])
+            ->get();
+
+        return response()->json($doctors);
+    }
+
 
     public function store(StoreDoctorRequest $request)
     {
