@@ -60,16 +60,8 @@ class User extends Authenticatable
     {
         return $this->role === 'doctor';
     }
+    
 
-    public function doctor()
-    {
-        return $this->hasOne(Doctor::class);
-    }
-
-    public function patient()
-    {
-        return $this->hasOne(Patient::class);
-    }
 
     public function doctorAppointments()
     {
@@ -80,4 +72,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Appointment::class, 'patient_id', 'id');
     }
+
+    public function officeLocation()
+{
+    return $this->belongsTo(OfficeLocation::class, 'office_location_id');
+}
 }

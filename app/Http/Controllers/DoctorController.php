@@ -44,19 +44,23 @@ class DoctorController extends Controller
     }
 
 
-    public function show($id)
-    {
-        $doctor = User::where('role', 'doctor')->findOrFail($id);
+public function show($id)
+{
+    $doctor = User::where('role', 'doctor')
+        ->with('officeLocation')
+        ->findOrFail($id);
 
-        return response()->json([
-            'id' => $doctor->id,
-            'name' => $doctor->name,
-            'email' => $doctor->email,
-            'specialization' => $doctor->specialization,
-            'office_location' => $doctor->office_location,
-            'phone_number' => $doctor->phone_number,
-        ]);
-    }
+    return response()->json([
+        'id' => $doctor->id,
+        'name' => $doctor->name,
+        'email' => $doctor->email,
+        'specialization' => $doctor->specialization,
+        'phone_number' => $doctor->phone_number,
+        'office_location' => $doctor->officeLocation
+            ? $doctor->officeLocation->building . ' - ' . $doctor->officeLocation->room_number
+            : null,
+    ]);
+}
 
     public function update(UpdateDoctorRequest $request, string $id)
     {
