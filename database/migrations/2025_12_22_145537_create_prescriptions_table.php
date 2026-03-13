@@ -13,22 +13,19 @@ return new class extends Migration
     {
         Schema::create('prescriptions', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('doctor_id')
-                ->references('user_id')
-                ->on('doctors')
+                ->references('id')
+                ->on('users')
                 ->onDelete('cascade');
-
             $table->foreignId('patient_id')
-                ->references('user_id')
-                ->on('patients')
+                ->references('id')
+                ->on('users')
                 ->onDelete('cascade');
 
             $table->string('medicine_name');
             $table->string('dosage');
             $table->date('issued_at');
             $table->date('valid_until');
-
             $table->timestamps();
         });
     }

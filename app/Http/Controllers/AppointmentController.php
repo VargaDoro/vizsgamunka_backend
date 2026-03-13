@@ -45,89 +45,114 @@ class AppointmentController extends Controller
         $appointment->delete();
         return response()->json(null, 200);
     }
-
-    
-public function myAppointments()
+/////////////////////// main branchből Doctor
+     public function doctorIndex()
     {
-        $user = Auth::user();
-
-        if (!$user->isUser()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $appointments = Appointment::with(['doctor.user'])
-            ->where('patient_id', $user->id) // itt a user_id-vel dolgozunk!
-            ->orderBy('appointment_time', 'asc')
-            ->get();
+        $doctorId = Auth::id();
+        $appointments = Appointment::with('patient:id,name,email')
+            ->where('doctor_id', $doctorId)
+            ->get()
+            ->map(function($appt){
+                return [
+                    'id' => $appt->id,
+                    'patient_name' => $appt->patient->name,
+                    'scheduled_at' => $appt->scheduled_at,
+                    'status' => $appt->status,
+                ];
+            });
 
         return response()->json($appointments);
     }
 
-    /**
-     * Új időpont foglalása.
-     * POST /api/appointments
-     * body: { "doctor_id": 5, "appointment_time": "2026-03-01 10:00" }
-     */
-    public function store(Request $request)
+     public function doctorStore(Request $request)
     {
-        $user = Auth::user();
-
-        if (!$user->isUser()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
         $validated = $request->validate([
-            // fontos: a doctors táblában a primary key a user_id, erre kell "exists"
-            'doctor_id'       => ['required', 'integer', 'exists:doctors,user_id'],
-            'appointment_time'=> ['required', 'date', 'after:now'],
+            'patient_id' => 'required|exists:patients,id',
+            'scheduled_at' => 'required|date',
+            'status' => 'nullable|string',
         ]);
 
-        // Ellenőrizzük, hogy az adott orvosnál szabad-e ez az időpont
-        $conflict = Appointment::where('doctor_id', $validated['doctor_id'])
-            ->where('appointment_time', $validated['appointment_time'])
-            ->where('status', 'booked')
-            ->exists();
-
-        if ($conflict) {
-            return response()->json([
-                'message' => 'The selected time slot is already booked.'
-            ], 422);
-        }
-
         $appointment = Appointment::create([
-            'doctor_id'       => $validated['doctor_id'],
-            'patient_id'      => $user->id, // user_id kerül ide
-            'appointment_time'=> $validated['appointment_time'],
-            'status'          => 'booked',
+            'doctor_id' => Auth::id(),
+            'patient_id' => $validated['patient_id'],
+            'scheduled_at' => $validated['scheduled_at'],
+            'status' => $validated['status'] ?? 'scheduled',
         ]);
 
         return response()->json($appointment, 201);
     }
 
-    /**
-     * Időpont lemondása.
-     * DELETE /api/appointments/{appointment}
-     */
-    public function cancel(Appointment $appointment)
+     public function doctorShow($id)
     {
-        $user = Auth::user();
+        $doctorId = Auth::id();
+        $appointment = Appointment::with('patient:id,name,email')
+            ->where('doctor_id', $doctorId)
+            ->findOrFail($id);
 
-        if (!$user->isUser()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        // csak a saját időpontját mondhatja le
-        if ($appointment->patient_id !== $user->id) {
-            return response()->json(['message' => 'Not your appointment'], 403);
-        }
-
-        if ($appointment->status !== 'booked') {
-            return response()->json(['message' => 'Cannot cancel this appointment'], 400);
-        }
-
-        $appointment->status = 'cancelled';
-        $appointment->save();
-
-        return response()->json(['message' => 'Appointment cancelled']);
+        return response()->json([
+            'id' => $appointment->id,
+            'patient_name' => $appointment->patient->name,
+            'scheduled_at' => $appointment->scheduled_at,
+            'status' => $appointment->status,
+        ]);
     }
+
+    /////////////// main branchből Patient
+       public function patientIndex()
+    {
+        $patientId = Auth::id();
+        $appointments = Appointment::with('doctor:id,name,email')
+            ->where('patient_id', $patientId)
+            ->get()
+            ->map(fn($appt) => [
+                'id' => $appt->id,
+                'doctor_name' => $appt->doctor->name,
+                'scheduled_at' => $appt->scheduled_at,
+                'status' => $appt->status,
+            ]);
+
+        return response()->json($appointments);
+    }
+
+    public function patientShow($id)
+    {
+        $patientId = Auth::id();
+        $appointment = Appointment::with('doctor:id,name,email')
+            ->where('patient_id', $patientId)
+            ->findOrFail($id);
+
+        return response()->json([
+            'id' => $appointment->id,
+            'doctor_name' => $appointment->doctor->name,
+            'scheduled_at' => $appointment->scheduled_at,
+            'status' => $appointment->status,
+        ]);
+    }
+
+    public function patientStore(Request $request)
+    {
+        $validated = $request->validate([
+            'doctor_id' => 'required|exists:users,id',
+            'scheduled_at' => 'required|date',
+        ]);
+
+        $appointment = Appointment::create([
+            'doctor_id' => $validated['doctor_id'],
+            'patient_id' => Auth::id(),
+            'scheduled_at' => $validated['scheduled_at'],
+            'status' => 'scheduled',
+        ]);
+
+        return response()->json($appointment, 201);
+    }
+
+    public function patientDestroy($id)
+    {
+        $patientId = Auth::id();
+        $appointment = Appointment::where('patient_id', $patientId)->findOrFail($id);
+        $appointment->delete();
+        return response()->json(null, 200);
+    }
+
+
 }

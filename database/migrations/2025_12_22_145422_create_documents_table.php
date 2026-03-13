@@ -14,16 +14,14 @@ return new class extends Migration
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('patient_id')
-                ->references('user_id')
-                ->on('patients')
-                ->onDelete('cascade');
-
             $table->foreignId('doctor_id')
-                ->references('user_id')
-                ->on('doctors')
+                ->references('id')
+                ->on('users')
                 ->onDelete('cascade');
-
+            $table->foreignId('patient_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
             $table->string('type', 50);
             $table->string('file_path', 255);
 

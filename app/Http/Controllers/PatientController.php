@@ -6,6 +6,8 @@ use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PatientController extends Controller
 {
@@ -42,37 +44,108 @@ class PatientController extends Controller
         $patient->delete();
         return response()->json(null, 200);
     }
-
-
-    public function me()
+    ///////////////////////////////main branchből admin
+    public function adminIndex()
     {
-        $user = Auth::user();
+        // Csak a szükséges mezők visszaadása
+        $patients = Patient::with('user:id,name,email,role')
+            ->get()
+            ->map(function ($patient) {
+                return [
+                    'id' => $patient->id,
+                    'name' => $patient->user->name,
+                    'email' => $patient->user->email,
+                    'role' => $patient->user->role,
+                    'created_at' => $patient->created_at,
+                ];
+            });
 
-        // Csak "normál" user (patient) használhatja
-        if (!$user->isUser()) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+        return response()->json($patients);
+    }
 
-        $patient = Patient::with('user')
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-        // GDPR: csak a szükséges adatokat küldjük
-        return response()->json([
-            'id'            => $patient->user_id,
-            'name'          => $patient->name,
-            'birth_date'    => $patient->birth_date,
-            'phone_number'  => $patient->phone_number,
-            'address'       => [
-                'country'       => $patient->country,
-                'city'          => $patient->city,
-                'postal_code'   => $patient->postal_code,
-                'street_address' => $patient->street_address,
-            ],
-            'user' => [
-                'email' => $patient->user->email,
-            ],
-            // 'social_security_number' -et is visszaadhatod, ha a UI-hoz kell
+    public function adminStore(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|exists:users,id',
         ]);
+
+        $patient = Patient::create($validated);
+
+        return response()->json([
+            'id' => $patient->id,
+            'id' => $patient->id,
+            'created_at' => $patient->created_at,
+        ], 200);
+    }
+
+    public function adminShow($id)
+    {
+        $patient = Patient::with('user:id,name,email,role')->findOrFail($id);
+
+        return response()->json([
+            'id' => $patient->id,
+            'name' => $patient->user->name,
+            'email' => $patient->user->email,
+            'role' => $patient->user->role,
+            'created_at' => $patient->created_at,
+        ]);
+    }
+
+
+
+    public function adminUpdate(Request $request, $id)
+    {
+        $patient = Patient::findOrFail($id);
+
+        $validated = $request->validate([
+            'id' => 'sometimes|exists:users,id',
+        ]);
+
+        $patient->update($validated);
+
+        return response()->json([
+            'id' => $patient->id,
+            'id' => $patient->id,
+            'updated_at' => $patient->updated_at,
+        ]);
+    }
+
+    public function adminDestroy($id)
+    {
+        $patient = Patient::findOrFail($id);
+        $patient->delete();
+
+        return response()->json(['message' => 'Patient deleted'], 200);
+    }
+
+    ///////////////////////////////main branchből patient
+    public function patientShowAuth()
+    {
+        $patient = Patient::with('user:id,name,email,phone')->where('id', Auth::id())->firstOrFail();
+
+        return response()->json([
+            'id' => $patient->id,
+            'name' => $patient->user->name,
+            'email' => $patient->user->email,
+            'phone' => $patient->user->phone,
+            'birthdate' => $patient->birthdate,
+            'gender' => $patient->gender,
+        ]);
+    }
+
+    public function patientUpdateAuth(Request $request)
+    {
+        $patient = Patient::where('id', Auth::id())->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|max:255',
+            'phone' => 'sometimes|string|max:50',
+            'birthdate' => 'sometimes|date',
+            'gender' => 'sometimes|string|max:20',
+        ]);
+
+        $patient->user->update($validated);
+        return response()->json($patient);
     }
 }
