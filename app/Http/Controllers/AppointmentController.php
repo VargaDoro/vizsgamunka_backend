@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\User;
 
 class AppointmentController extends Controller
 {
@@ -154,5 +153,46 @@ class AppointmentController extends Controller
         return response()->json(null, 200);
     }
 
+    //////// beteg időpontot foglal orvoshoz funkció ////////
 
+    //Orvos időpontjainak lekérése
+    public function doctorAppointmentsForPatient($doctor_id)
+    {
+        $appointments = Appointment::where('doctor_id', $doctor_id)
+            ->with('patient:id,name,email')
+            ->get();
+
+        return response()->json($appointments);
+    }
+
+    //Időpont foglalása adott orvoshoz
+    public function patientBookAppointment(Request $request, $doctor_id)
+{
+    $validated = $request->validate([
+        'appointment_time' => 'required|date|after:today',
+    ]);
+
+    $patient_id = $request->user()->id;
+
+    // Ütközés
+    $exists = Appointment::where('doctor_id', $doctor_id)
+        ->where('appointment_time', $validated['appointment_time'])
+        ->exists();
+
+    if ($exists) {
+        return response()->json(['message' => 'Ez az időpont foglalt!'], 409);
+    }
+
+    $appointment = Appointment::create([
+        'doctor_id' => $doctor_id,
+        'patient_id' => $patient_id,
+        'appointment_time' => $validated['appointment_time'],
+        'status' => 'scheduled',
+    ]);
+
+    return response()->json([
+        'message' => 'Foglalás sikeres!',
+        'appointment' => $appointment
+    ], 201);
+}
 }

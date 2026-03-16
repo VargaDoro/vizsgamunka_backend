@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user()->load([
             'doctorAppointments.doctor',
             //'patientAppointments.patient'
-            'patientAppointments.doctor'
+            'patientAppointments.doctor' //beteg tudjon orvoshoz időpontot foglalni
 
         ]);
     });
@@ -35,6 +35,9 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         Route::get('/doctors', [DoctorController::class, 'index']);
         //csak egy orvos listázása
         Route::get('/doctors/{id}', [DoctorController::class, 'show']);
+        //beteg időpontfoglalása orvoshoz
+        Route::get('/doctors/{doctor_id}/appointments', [AppointmentController::class, 'doctorAppointmentsForPatient']);
+        Route::post('/doctors/{doctor_id}/appointments', [AppointmentController::class, 'patientBookAppointment']);
     });
 
 // Admin funkciók
