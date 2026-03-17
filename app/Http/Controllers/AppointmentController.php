@@ -169,8 +169,7 @@ class AppointmentController extends Controller
     public function patientBookAppointment(Request $request, $doctor_id)
 {
     $validated = $request->validate([
-        //'appointment_time' => 'required|date|after:today',
-        'appointment_time' => 'required|date',
+        'appointment_time' => 'required|date|after:now',
     ]);
 
     $patient_id = $request->user()->id;
