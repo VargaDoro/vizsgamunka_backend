@@ -40,6 +40,9 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         Route::post('/doctors/{doctor_id}/appointments', [AppointmentController::class, 'patientBookAppointment']);
         //beteg saját foglalt időpontjainak listázása
         Route::get('/appointments', [AppointmentController::class, 'patientIndex']);
+        // beteg saját időpont törlése
+        Route::delete('/appointments/{id}', [AppointmentController::class, 'patientDestroy']);
+
     });
 
 // Admin funkciók

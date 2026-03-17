@@ -157,7 +157,7 @@ class AppointmentController extends Controller
 
         return response()->json($appointment, 201);
     }
-
+/////////////// beteg törli a saját foglalását funkció//////////////
     public function patientDestroy($id)
     {
         $patientId = Auth::id();
@@ -184,7 +184,7 @@ class AppointmentController extends Controller
                     'patient' => $appt->patient,
                 ];
             });
-    
+
         return response()->json($appointments);
     }
     //Időpont foglalása adott orvoshoz
