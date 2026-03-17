@@ -97,18 +97,31 @@ class AppointmentController extends Controller
     }
 
     /////////////// main branchből Patient
-       public function patientIndex()
+    public function patientIndex(Request $request)
     {
         $patientId = Auth::id();
-        $appointments = Appointment::with('doctor:id,name,email')
+
+        $order = $request->query('order', 'asc');
+        if (! in_array($order, ['asc', 'desc'])) {
+            $order = 'asc';
+        }
+
+        $appointments = Appointment::with('doctor.officeLocation')
             ->where('patient_id', $patientId)
+            ->orderBy('appointment_time', $order)
             ->get()
-            ->map(fn($appt) => [
-                'id' => $appt->id,
-                'doctor_name' => $appt->doctor->name,
-                'scheduled_at' => $appt->scheduled_at,
-                'status' => $appt->status,
-            ]);
+            ->map(function ($appt) {
+                return [
+                    'id' => $appt->id,
+                    'doctor_name' => $appt->doctor->name,
+                    'specialization' => $appt->doctor->specialization,
+                    'office_location' => $appt->doctor->officeLocation
+                        ? $appt->doctor->officeLocation->building . ' ' . $appt->doctor->officeLocation->room_number
+                        : 'Nincs megadva',
+                    'appointment_time' => $appt->appointment_time,
+                    'status' => $appt->status,
+                ];
+            });
 
         return response()->json($appointments);
     }
