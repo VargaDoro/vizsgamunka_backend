@@ -172,40 +172,49 @@ class AppointmentController extends Controller
     public function doctorAppointmentsForPatient($doctor_id)
     {
         $appointments = Appointment::where('doctor_id', $doctor_id)
-            ->with('patient:id,name,email')
-            ->get();
-
+            ->with('patient:id,name')
+            ->get()
+            ->map(function ($appt) {
+                return [
+                    'id' => $appt->id,
+                    'doctor_id' => $appt->doctor_id,
+                    'patient_id' => $appt->patient_id,
+                    'appointment_time' => $appt->appointment_time,
+                    'status' => $appt->status,
+                    'patient' => $appt->patient,
+                ];
+            });
+    
         return response()->json($appointments);
     }
-
     //Időpont foglalása adott orvoshoz
     public function patientBookAppointment(Request $request, $doctor_id)
-{
-    $validated = $request->validate([
-        'appointment_time' => 'required|date|after:now',
-    ]);
+    {
+        $validated = $request->validate([
+            'appointment_time' => 'required|date|after:now',
+        ]);
 
-    $patient_id = $request->user()->id;
+        $patient_id = $request->user()->id;
 
-    // Ütközés
-    $exists = Appointment::where('doctor_id', $doctor_id)
-        ->where('appointment_time', $validated['appointment_time'])
-        ->exists();
+        // Ütközés
+        $exists = Appointment::where('doctor_id', $doctor_id)
+            ->where('appointment_time', $validated['appointment_time'])
+            ->exists();
 
-    if ($exists) {
-        return response()->json(['message' => 'Ez az időpont foglalt!'], 409);
+        if ($exists) {
+            return response()->json(['message' => 'Ez az időpont foglalt!'], 409);
+        }
+
+        $appointment = Appointment::create([
+            'doctor_id' => $doctor_id,
+            'patient_id' => $patient_id,
+            'appointment_time' => $validated['appointment_time'],
+            'status' => 'scheduled',
+        ]);
+
+        return response()->json([
+            'message' => 'Foglalás sikeres!',
+            'appointment' => $appointment
+        ], 201);
     }
-
-    $appointment = Appointment::create([
-        'doctor_id' => $doctor_id,
-        'patient_id' => $patient_id,
-        'appointment_time' => $validated['appointment_time'],
-        'status' => 'scheduled',
-    ]);
-
-    return response()->json([
-        'message' => 'Foglalás sikeres!',
-        'appointment' => $appointment
-    ], 201);
-}
 }
