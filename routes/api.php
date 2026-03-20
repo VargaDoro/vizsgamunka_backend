@@ -25,7 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
         ]);
     });
-
 });
 
 // Betegnek szóló csoport
@@ -42,17 +41,16 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         Route::get('/appointments', [AppointmentController::class, 'patientIndex']);
         // beteg saját időpont törlése
         Route::delete('/appointments/{id}', [AppointmentController::class, 'patientDestroy']);
-        //specialization végpont
-        //Route
-
+        // szakrendelések: elérhető szakterületek listája
+        Route::get('/specializations', [DoctorController::class, 'specializations']);
     });
 
 // Admin funkciók
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
-       //orvosok kilistázása funkcióhoz
-        Route::get('/doctors', [DoctorController::class, 'index']);
+    //orvosok kilistázása funkcióhoz
+    Route::get('/doctors', [DoctorController::class, 'index']);
     // Összes beteg listázása admin számára
     Route::get('/patients', [PatientController::class, 'index']);
 });
@@ -72,5 +70,3 @@ Route::middleware(['auth:sanctum', DoctorMW::class])
         // Recept CRUD
         Route::apiResource('prescriptions', PrescriptionController::class); //get,post,put,delete külön doctor...
     });
-
-
