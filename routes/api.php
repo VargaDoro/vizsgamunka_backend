@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         // szakrendelések: elérhető szakterületek listája
         Route::get('/specializations', [DoctorController::class, 'specializations']);
     });
-
+/*
 // Admin funkciók
 Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
@@ -54,6 +54,23 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     // Összes beteg listázása admin számára
     Route::get('/patients', [PatientController::class, 'index']);
 });
+*/ 
+
+//prefixes megoldás, hogy ne írja felül egymást, ha ugyanazt a route-ot akarjuk használni
+Route::middleware(['auth:sanctum', AdminMW::class])
+    ->prefix('admin')
+    ->group(function () {
+
+        // admin összes felhasználó listája
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/users/{id}', [UserController::class, 'show']);
+
+        // admin orvosok listája (külön útvonal!)
+        Route::get('/doctors', [DoctorController::class, 'index']);
+
+        // admin összes beteg listája
+        Route::get('/patients', [PatientController::class, 'index']);
+    });
 
 //Orvos funkciók
 Route::middleware(['auth:sanctum', DoctorMW::class])

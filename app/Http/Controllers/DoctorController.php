@@ -6,21 +6,13 @@ use App\Models\Doctor;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class DoctorController extends Controller
 {
-    /*
-    public function index()
+    public function index(Request $request)
     {
-        $doctors = Doctor::with(['user', 'officeLocation'])->get();
-        return response()->json($doctors);
-    }
-        */
-
-    public function index()
-    {
-        // Csak a doctors szerepkörű userek listája
-        $doctors = User::where('role', 'doctor')
+        $query = User::where('role', 'doctor')
             ->select([
                 'id',
                 'name',
@@ -39,7 +31,6 @@ class DoctorController extends Controller
 
         return response()->json($doctors);
     }
-
 
     public function store(StoreDoctorRequest $request)
     {
