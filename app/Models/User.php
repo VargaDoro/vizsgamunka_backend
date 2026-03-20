@@ -53,17 +53,25 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function isPatient()
-    {
-        return $this->role === 'patient';
-    }
-
     public function isDoctor()
     {
         return $this->role === 'doctor';
     }
+        public function isPatient()
+    {
+        return $this->role === 'patient';
+    }
 
-
+/* apiban struktura létrehozása
+    public function isDoctorOrAdmin()
+    {
+        return $this->role === 'doctor' || $this->role === 'admin' ;
+    }
+    public function isDoctorOrPatient()
+    {
+        return $this->role === 'doctor' || $this->role === 'patient';
+    }
+*/
 
     public function doctorAppointments()
     {
