@@ -28,8 +28,14 @@ class DoctorController extends Controller
                 'phone_number',
                 'specialization',
                 'office_location_id',
-            ])
-            ->get();
+            ]);
+
+        // SZAK SZERINTI SZŰRÉS
+        if ($request->filled('specialization')) {
+            $query->where('specialization', $request->query('specialization'));
+        }
+
+        $doctors = $query->get();
 
         return response()->json($doctors);
     }
