@@ -46,20 +46,18 @@ Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
     Route::get('/patients', [PatientController::class, 'index']);
 });
 
-//Orvos funkciók
+// Orvos funkciók
 Route::middleware(['auth:sanctum', DoctorMW::class])
     ->prefix('doctor')
     ->group(function () {
-        // Saját páciensek listázása
         Route::get('/patients', [PatientController::class, 'doctorIndex']);
-        // Egy páciens lekérdezése
-        Route::get('/patients/{patient_id}', [PatientController::class, 'doctorShow']);
+        Route::get('/patients/{id}', [PatientController::class, 'doctorShow']);
         // Dokumentum feltöltés
         Route::post('/documents', [DocumentController::class, 'doctorStore']);
-        // Időpont CRUD
-        Route::get('appointments', [AppointmentController::class, 'doctorIndex']); //post,put,delete
+        // Időpontok
+        Route::get('/appointments', [AppointmentController::class, 'doctorIndex']);
         // Recept CRUD
-        Route::apiResource('prescriptions', PrescriptionController::class); //get,post,put,delete külön doctor...
+        Route::apiResource('/prescriptions', PrescriptionController::class);
     });
 
 

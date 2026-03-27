@@ -74,7 +74,7 @@ class UserController extends Controller
 
     public function setCookie(Request $request){ 
         $minutes = 60; 
-        $response = new Response('Set Cookie'); $response->withCookie(cookie($request->'name', 'MyValue', $minutes)); 
+        $response = new Response('Set Cookie'); $response->withCookie(cookie($request->name, 'MyValue', $minutes)); 
         return $response; 
     }
 
