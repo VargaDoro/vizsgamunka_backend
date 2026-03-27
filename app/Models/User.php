@@ -62,16 +62,10 @@ class User extends Authenticatable
         return $this->role === 'patient';
     }
 
-/* apiban struktura létrehozása
     public function isDoctorOrAdmin()
     {
         return $this->role === 'doctor' || $this->role === 'admin' ;
     }
-    public function isDoctorOrPatient()
-    {
-        return $this->role === 'doctor' || $this->role === 'patient';
-    }
-*/
 
     public function doctorAppointments()
     {
@@ -88,5 +82,24 @@ class User extends Authenticatable
         return $this->belongsTo(OfficeLocation::class, 'office_location_id');
     }
 
-    
+    // Orvos páciensei
+    public function patients()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'appointments',
+            'doctor_id',
+            'patient_id'
+        )->where('users.role', 'patient')->distinct();
+    }
+
+    public function doctors()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'appointments',
+            'patient_id',
+            'doctor_id'
+        )->where('users.role', 'doctor')->distinct();
+    }
 }

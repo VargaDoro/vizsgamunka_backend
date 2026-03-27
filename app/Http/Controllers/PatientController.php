@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Http\Requests\StorePatientRequest;
 use App\Http\Requests\UpdatePatientRequest;
 use Illuminate\Http\Request;
@@ -146,6 +145,58 @@ class PatientController extends Controller
         ]);
 
         $patient->user->update($validated);
+        return response()->json($patient);
+    }
+
+    //doctor
+    public function doctorIndex()
+    {
+        $doctor = auth()->user();
+
+        $patients = $doctor->patients()
+            ->select([
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.social_security_number',
+                'users.birth_date',
+                'users.country',
+                'users.city',
+                'users.postal_code',
+                'users.street_address',
+                'users.phone_number',
+            ])
+            ->get();
+
+        return response()->json($patients);
+    }
+
+    public function doctorShow($id)
+    {
+        $doctor = auth()->user();
+
+        $patient = $doctor->patients()
+            ->where('users.id', $id)
+            ->select([
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.social_security_number',
+                'users.birth_date',
+                'users.country',
+                'users.city',
+                'users.postal_code',
+                'users.street_address',
+                'users.phone_number',
+            ])
+            ->first();
+
+        if (!$patient) {
+            return response()->json([
+                'message' => 'A páciens nem található, vagy nincs ehhez az orvoshoz időpontja.'
+            ], 404);
+        }
+
         return response()->json($patient);
     }
 }
