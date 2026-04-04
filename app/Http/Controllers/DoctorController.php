@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
-use App\Models\User;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 class DoctorController extends Controller
@@ -34,7 +34,7 @@ class DoctorController extends Controller
 
     public function store(StoreDoctorRequest $request)
     {
-        $doctor = new Doctor();
+        $doctor = new User();
         $doctor->fill($request->all());
         $doctor->save();
         return response()->json($doctor, 200);
@@ -61,7 +61,7 @@ class DoctorController extends Controller
 
     public function update(UpdateDoctorRequest $request, string $id)
     {
-        $doctor = Doctor::findOrFail($id);
+        $doctor = User::findOrFail($id);
         $doctor->fill($request->all());
         $doctor->save();
         return response()->json($doctor, 200);
@@ -69,7 +69,7 @@ class DoctorController extends Controller
 
     public function destroy(string $id)
     {
-        $doctor = Doctor::findOrFail($id);
+        $doctor = User::findOrFail($id);
         $doctor->delete();
         return response()->json(null, 200);
     }
