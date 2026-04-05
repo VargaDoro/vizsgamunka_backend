@@ -17,6 +17,7 @@ class Document extends Model
         'doctor_id',
         'type',
         'file_path',
+        'created_at',
     ];
 
     protected $casts = [
@@ -25,12 +26,12 @@ class Document extends Model
 
     public function patient()
     {
-        return $this->belongsTo(Patient::class, 'patient_id');
+        return $this->belongsTo(User::class, 'patient_id');
     }
 
     public function doctor()
     {
-        return $this->belongsTo(Doctor::class, 'doctor_id');
+        return $this->belongsTo(User::class, 'doctor_id');
     }
 
     public function type()

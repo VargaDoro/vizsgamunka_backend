@@ -15,8 +15,20 @@ class AdminMW
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+         $user = $request->user(); // mindig így jobb, mint auth()
+
+        // 1: Ha nincs bejelentkezve → 401 Unauthorized
+        if (!$user) {
+            return response()->json([
+                'message' => 'Bejelentkezés szükséges.'
+            ], 401);
+        }
+
+        // 2: Ha nem admin → 403 Forbidden
+        if (!$user->isAdmin()) {
+            return response()->json([
+                'message' => 'Ezt a műveletet csak admin felhasználó végezheti.'
+            ], 403);
         }
 
         return $next($request);

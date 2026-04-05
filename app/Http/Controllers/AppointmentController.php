@@ -55,7 +55,7 @@ class AppointmentController extends Controller
                 return [
                     'id' => $appt->id,
                     'patient_name' => $appt->patient->name,
-                    'scheduled_at' => $appt->scheduled_at,
+                    'appointment_time' => $appt->appointment_time,
                     'status' => $appt->status,
                 ];
             });
@@ -67,14 +67,14 @@ class AppointmentController extends Controller
     {
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
-            'scheduled_at' => 'required|date',
+            'appointment_time' => 'required|date',
             'status' => 'nullable|string',
         ]);
 
         $appointment = Appointment::create([
             'doctor_id' => Auth::id(),
             'patient_id' => $validated['patient_id'],
-            'scheduled_at' => $validated['scheduled_at'],
+            'appointment_time' => $validated['appointment_time'],
             'status' => $validated['status'] ?? 'scheduled',
         ]);
 
@@ -91,7 +91,7 @@ class AppointmentController extends Controller
         return response()->json([
             'id' => $appointment->id,
             'patient_name' => $appointment->patient->name,
-            'scheduled_at' => $appointment->scheduled_at,
+            'appointment_time' => $appointment->appointment_time,
             'status' => $appointment->status,
         ]);
     }
@@ -136,7 +136,7 @@ class AppointmentController extends Controller
         return response()->json([
             'id' => $appointment->id,
             'doctor_name' => $appointment->doctor->name,
-            'scheduled_at' => $appointment->scheduled_at,
+            'appointment_time' => $appointment->appointment_time,
             'status' => $appointment->status,
         ]);
     }
@@ -145,13 +145,13 @@ class AppointmentController extends Controller
     {
         $validated = $request->validate([
             'doctor_id' => 'required|exists:users,id',
-            'scheduled_at' => 'required|date',
+            'appointment_time' => 'required|date',
         ]);
 
         $appointment = Appointment::create([
             'doctor_id' => $validated['doctor_id'],
             'patient_id' => Auth::id(),
-            'scheduled_at' => $validated['scheduled_at'],
+            'appointment_time' => $validated['appointment_time'],
             'status' => 'scheduled',
         ]);
 
