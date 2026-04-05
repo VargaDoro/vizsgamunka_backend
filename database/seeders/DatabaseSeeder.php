@@ -39,6 +39,8 @@ class DatabaseSeeder extends Seeder
         $this->call(DocumentTypeSeeder::class);
         $this->call(OfficeLocationSeeder::class);
         $this->call(AppointmentSeeder::class);
+        $this->call(PrescriptionSeeder::class);
+        $this->call(DocumentSeeder::class);
 
     }
 }
