@@ -50,6 +50,8 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         Route::delete('/appointments/{id}', [AppointmentController::class, 'patientDestroy']);
         // szakrendelések: elérhető szakterületek listája
         Route::get('/specializations', [DoctorController::class, 'specializations']);
+        //beteg saját dokumentumai
+        Route::get('/documents', [DocumentController::class, 'patientIndex']);
     });
 /*
 // Admin funkciók

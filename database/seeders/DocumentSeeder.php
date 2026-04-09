@@ -7,15 +7,38 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+
 class DocumentSeeder extends Seeder
 {
     public function run(): void
     {
+        $patients = User::where('role', 'patient')->get();
+        $doctors  = User::where('role', 'doctor')->get();
+
+        if ($patients->isEmpty() || $doctors->isEmpty()) {
+            throw new \Exception('Nincs elég beteg vagy orvos a dokumentumok seedeléséhez.');
+        }
+
+        foreach ($patients as $patient) {
+            Document::create([
+                'doctor_id'  => $doctors->random()->id,
+                'patient_id' => $patient->id,
+                'type'       => 'Teszt dokumentum',
+                'file_path'  => 'documents/test.pdf',
+                'created_at' => now(),
+            ]);
+        }
+    }
+}
+
+        /*
         $doctor1 = User::where('email', 'kovacs.bela@clinic.hu')->first();
         $doctor2 = User::where('email', 'szabo.anna@clinic.hu')->first();
         $doctor3 = User::where('email', 'toth.gergely@clinic.hu')->first();
 
         $patient1 = User::where('email', 'patient1@test.com')->first();
+
+        
         $patient2 = User::where('email', 'patient2@test.com')->first();
         $patient3 = User::where('email', 'patient3@test.com')->first();
         $patient4 = User::where('email', 'patient4@test.com')->first();
@@ -65,8 +88,10 @@ class DocumentSeeder extends Seeder
             ],
         ];
 
+
         foreach ($documents as $document) {
             Document::create($document);
         }
     }
 }
+*/

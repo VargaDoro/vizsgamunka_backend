@@ -29,18 +29,17 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'role' => 'admin',
         ]);
-
-        // Call Doctor Seeder
-        $this->call(DoctorSeeder::class);
-
-        // Call Patients Seeder
-        $this->call(PatientSeeder::class);
-
-        $this->call(DocumentTypeSeeder::class);
-        $this->call(OfficeLocationSeeder::class);
-        $this->call(AppointmentSeeder::class);
-        $this->call(PrescriptionSeeder::class);
-        $this->call(DocumentSeeder::class);
+  
+        $this->call([
+            UserSeeder::class,
+            DoctorSeeder::class,
+            PatientSeeder::class,
+            DocumentTypeSeeder::class,
+            OfficeLocationSeeder::class,
+            AppointmentSeeder::class,
+            PrescriptionSeeder::class,
+            DocumentSeeder::class,
+        ]);
 
     }
 }
