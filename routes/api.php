@@ -27,13 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
-    Route::get('/document-types', [DocumentController::class, 'documentTypes']);
-    Route::get('/document_types', [DocumentController::class, 'documentTypes']);
-    Route::get('/document-type', [DocumentController::class, 'documentTypes']);
-    Route::post('/documents', [DocumentController::class, 'upload']);
-});
-
 // Betegnek szóló csoport
 Route::middleware(['auth:sanctum', PatientMW::class])
     ->group(function () {
@@ -89,7 +82,11 @@ Route::middleware(['auth:sanctum', DoctorMW::class])
         Route::post('/patients', [PatientController::class, 'doctorStore']);
         Route::get('/patients/{id}', [PatientController::class, 'doctorShow']);
         // Dokumentum feltöltés
-        Route::post('/documents', [DocumentController::class, 'doctorStore']);
+        Route::get('/document-types', [DocumentController::class, 'documentTypes']);
+        Route::get('/document_types', [DocumentController::class, 'documentTypes']);
+        Route::get('/document-type', [DocumentController::class, 'documentTypes']);
+        Route::post('/documents', [DocumentController::class, 'upload']);
+
         // Időpontok
         Route::get('/appointments', [AppointmentController::class, 'doctorIndex']);
         // Recept CRUD
