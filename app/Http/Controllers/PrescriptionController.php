@@ -3,130 +3,93 @@
 namespace App\Http\Controllers;
 
 use App\Models\Prescription;
-use App\Http\Requests\StorePrescriptionRequest;
-use App\Http\Requests\UpdatePrescriptionRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PrescriptionController extends Controller
 {
     public function index()
     {
-        $prescriptions = Prescription::with(['doctor', 'patient'])->get();
-        return response()->json($prescriptions);
-    }
-
-    public function store(StorePrescriptionRequest $request)
-    {
-        $prescription = new Prescription();
-        $prescription->fill($request->all());
-        $prescription->save();
-        return response()->json($prescription, 200);
-    }
-
-    public function show(string $id)
-    {
-        return Prescription::with(['doctor', 'patient'])->findOrFail($id);
-    }
-
-    public function update(UpdatePrescriptionRequest $request, string $id)
-    {
-        $prescription = Prescription::findOrFail($id);
-        $prescription->fill($request->all());
-        $prescription->save();
-        return response()->json($prescription, 200);
-    }
-
-    public function destroy(string $id)
-    {
-        $prescription = Prescription::findOrFail($id);
-        $prescription->delete();
-        return response()->json(null, 200);
-    }
-
-    //////////////// main branchből doctor
-     public function doctorIndex()
-    {
-        $doctorId = Auth::id();
         $prescriptions = Prescription::with('patient:id,name,email')
-            ->where('doctor_id', $doctorId)
-            ->get()
-            ->map(function($prescription){
-                return [
-                    'id' => $prescription->id,
-                    'patient_name' => $prescription->patient->name,
-                    'medication' => $prescription->medication,
-                    'dosage' => $prescription->dosage,
-                    'created_at' => $prescription->created_at,
-                ];
-            });
+            ->where('doctor_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->get();
 
         return response()->json($prescriptions);
     }
 
-     public function doctorStore(Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'medication' => 'required|string',
-            'dosage' => 'required|string',
+            'patient_id' => [
+                'required',
+                Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'patient')),
+            ],
+            'medicine_name' => 'required|string|max:255',
+            'dosage' => 'required|string|max:255',
+            'issued_at' => 'required|date',
+            'valid_until' => 'required|date|after_or_equal:issued_at',
         ]);
 
         $prescription = Prescription::create([
             'doctor_id' => Auth::id(),
             'patient_id' => $validated['patient_id'],
-            'medication' => $validated['medication'],
+            'medicine_name' => $validated['medicine_name'],
             'dosage' => $validated['dosage'],
+            'issued_at' => $validated['issued_at'],
+            'valid_until' => $validated['valid_until'],
         ]);
 
         return response()->json($prescription, 201);
     }
 
-     public function doctorShow($id)
+    public function show(string $id)
     {
-        $doctorId = Auth::id();
         $prescription = Prescription::with('patient:id,name,email')
-            ->where('doctor_id', $doctorId)
+            ->where('doctor_id', Auth::id())
             ->findOrFail($id);
 
-        return response()->json([
-            'id' => $prescription->id,
-            'patient_name' => $prescription->patient->name,
-            'medication' => $prescription->medication,
-            'dosage' => $prescription->dosage,
-            'created_at' => $prescription->created_at,
-        ]);
+        return response()->json($prescription);
     }
 
-    ////////////////// main branchből patient
-      public function patientIndex()
+    public function update(Request $request, string $id)
     {
-        $patientId = Auth::id();
-        $prescriptions = Prescription::with('doctor:id,name,email')
-            ->where('patient_id', $patientId)
-            ->get()
-            ->map(fn($presc) => [
-                'id' => $presc->id,
-                'doctor_name' => $presc->doctor->name,
-                'medication' => $presc->medication,
-                'dosage' => $presc->dosage,
-                'created_at' => $presc->created_at,
-            ]);
+        $prescription = Prescription::where('doctor_id', Auth::id())->findOrFail($id);
 
-        return response()->json($prescriptions);
+        $validated = $request->validate([
+            'patient_id' => [
+                'sometimes',
+                Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'patient')),
+            ],
+            'medicine_name' => 'sometimes|string|max:255',
+            'dosage' => 'sometimes|string|max:255',
+            'issued_at' => 'sometimes|date',
+            'valid_until' => 'sometimes|date',
+        ]);
+
+        if (isset($validated['valid_until']) && !isset($validated['issued_at'])) {
+            $validated['issued_at'] = $prescription->issued_at;
+        }
+
+        if (isset($validated['issued_at']) && isset($validated['valid_until'])
+            && $validated['valid_until'] < $validated['issued_at']) {
+            return response()->json([
+                'message' => 'A valid_until nem lehet korabbi, mint az issued_at.'
+            ], 422);
+        }
+
+        $prescription->fill($validated);
+        $prescription->save();
+
+        return response()->json($prescription, 200);
     }
 
-    public function patientShow($id)
+    public function destroy(string $id)
     {
-        $patientId = Auth::id();
-        $prescription = Prescription::with('doctor:id,name,email')
-            ->where('patient_id', $patientId)
-            ->findOrFail($id);
+        $prescription = Prescription::where('doctor_id', Auth::id())->findOrFail($id);
+        $prescription->delete();
 
-        return response()->json([
-            'id' => $prescription->id,
-            'doctor_name' => $prescription->doctor->name,
-            'medication' => $prescription->medication,
-            'dosage' => $prescription->dosage,
-            'created_at' => $prescription->created_at,
-        ]);
+        return response()->json(null, 200);
     }
 }
