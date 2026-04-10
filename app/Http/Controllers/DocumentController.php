@@ -23,6 +23,12 @@ class DocumentController extends Controller
 
     public function upload(Request $request)
     {
+        $request->merge([
+            // Backward compatibility for older frontend payload keys.
+            'document_type_id' => $request->input('document_type_id', $request->input('type_id')),
+            'taj' => $request->input('taj', $request->input('social_security_number')),
+        ]);
+
         $validated = $request->validate([
             'file' => 'required|file|max:10240',
             'taj' => 'required|string|max:20',
@@ -79,14 +85,13 @@ class DocumentController extends Controller
     public function patientIndex()
     {
         $patientId = Auth::id();
-        $documents = Document::with('doctor:id,name,email','type:id,name')
+        $documents = Document::with('doctor:id,name,email','type:id,type')
             ->where('patient_id', $patientId)
             ->get()
             ->map(fn($doc) => [
                 'id' => $doc->id,
                 'doctor_name' => $doc->doctor->name,
-                'type' => $doc->type->name,
-                'description' => $doc->description,
+                'type' => $doc->type?->type ?? $doc->type,
                 'created_at' => $doc->created_at,
             ]);
 

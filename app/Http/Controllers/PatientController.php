@@ -55,6 +55,11 @@ class PatientController extends Controller
 
     public function doctorStore(Request $request)
     {
+        $request->merge([
+            // Support legacy frontend field name.
+            'social_security_number' => $request->input('social_security_number', $request->input('taj')),
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'social_security_number' => 'nullable|string|max:20|unique:users,social_security_number',
@@ -67,6 +72,11 @@ class PatientController extends Controller
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'nullable|string|min:8',
         ]);
+
+        // Empty string should behave as null for unique nullable fields.
+        if (isset($validated['social_security_number']) && trim((string) $validated['social_security_number']) === '') {
+            $validated['social_security_number'] = null;
+        }
 
         $patient = User::create([
             'name' => $validated['name'],

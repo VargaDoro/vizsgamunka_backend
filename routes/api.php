@@ -27,6 +27,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+// Legacy doctor document routes kept for frontend compatibility.
+Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
+    Route::get('/document-types', [DocumentController::class, 'documentTypes']);
+    Route::get('/document_types', [DocumentController::class, 'documentTypes']);
+    Route::get('/document-type', [DocumentController::class, 'documentTypes']);
+    Route::post('/documents', [DocumentController::class, 'upload']);
+});
+
 // Betegnek szóló csoport
 Route::middleware(['auth:sanctum', PatientMW::class])
     ->group(function () {
