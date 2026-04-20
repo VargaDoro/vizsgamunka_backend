@@ -12,9 +12,10 @@ class Document_type extends Model
     protected $fillable = [
         'type',
     ];
+
     public function documents()
     {
-        return $this->hasMany(Document::class, 'type', 'type');
+        return $this->hasMany(Document::class, 'document_type_id');
     }
 
 }

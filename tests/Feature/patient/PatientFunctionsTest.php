@@ -228,25 +228,14 @@ class PatientFunctionsTest extends TestCase
     {
         Sanctum::actingAs($this->patient);
 
-        // Ha van document_types tábla és kell hozzá type rekord, beszúrjuk biztonságosan
-        // (különböző projektekben eltérhetnek a mezőnevek, ezért óvatos)
-        if (Schema::hasTable('document_types')) {
-            $insert = [];
-            if (Schema::hasColumn('document_types', 'type')) {
-                $insert['type'] = 'Teszt dokumentum';
-            }
-            if (Schema::hasColumn('document_types', 'name')) {
-                $insert['name'] = 'Teszt dokumentum';
-            }
-            if (!empty($insert)) {
-                DB::table('document_types')->insert($insert);
-            }
-        }
+        $documentTypeId = DB::table('document_types')->insertGetId([
+            'type' => 'Teszt dokumentum',
+        ]);
 
         Document::create([
             'doctor_id' => $this->doctor->id,
             'patient_id' => $this->patient->id,
-            'type' => 'Teszt dokumentum',
+            'document_type_id' => $documentTypeId,
             'file_path' => 'documents/test.pdf',
             'created_at' => now(),
         ]);
@@ -265,11 +254,14 @@ class PatientFunctionsTest extends TestCase
         Sanctum::actingAs($this->patient);
 
         $otherPatient = User::factory()->create(['role' => 'patient']);
+        $secretTypeId = DB::table('document_types')->insertGetId([
+            'type' => 'Titkos dokumentum',
+        ]);
 
         Document::create([
             'doctor_id' => $this->doctor->id,
             'patient_id' => $otherPatient->id,
-            'type' => 'Titkos dokumentum',
+            'document_type_id' => $secretTypeId,
             'file_path' => 'documents/secret.pdf',
             'created_at' => now(),
         ]);

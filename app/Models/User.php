@@ -102,7 +102,7 @@ class User extends Authenticatable
             'appointments',
             'doctor_id',
             'patient_id'
-        )->where('users.role', 'patient')->distinct();
+        )->distinct();
     }
 
     public function doctors()
@@ -112,6 +112,6 @@ class User extends Authenticatable
             'appointments',
             'patient_id',
             'doctor_id'
-        )->where('users.role', 'doctor')->distinct();
+        )->distinct();
     }
 }

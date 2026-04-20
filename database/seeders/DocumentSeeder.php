@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Document;
+use App\Models\Document_type;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,16 +15,17 @@ class DocumentSeeder extends Seeder
     {
         $patients = User::where('role', 'patient')->get();
         $doctors  = User::where('role', 'doctor')->get();
+        $defaultType = Document_type::query()->orderBy('id')->first();
 
-        if ($patients->isEmpty() || $doctors->isEmpty()) {
-            throw new \Exception('Nincs elég beteg vagy orvos a dokumentumok seedeléséhez.');
+        if ($patients->isEmpty() || $doctors->isEmpty() || !$defaultType) {
+            throw new \Exception('Nincs eleg beteg, orvos vagy dokumentum tipus a dokumentumok seedelesehez.');
         }
 
         foreach ($patients as $patient) {
             Document::create([
                 'doctor_id'  => $doctors->random()->id,
                 'patient_id' => $patient->id,
-                'type'       => 'Teszt dokumentum',
+                'document_type_id' => $defaultType->id,
                 'file_path'  => 'documents/test.pdf',
                 'created_at' => now(),
             ]);

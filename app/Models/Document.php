@@ -15,7 +15,7 @@ class Document extends Model
     protected $fillable = [
         'patient_id',
         'doctor_id',
-        'type',
+        'document_type_id',
         'file_path',
         'created_at',
     ];
@@ -34,8 +34,13 @@ class Document extends Model
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
+    public function documentType()
+    {
+        return $this->belongsTo(Document_type::class, 'document_type_id');
+    }
+
     public function type()
     {
-        return $this->belongsTo(Document_type::class, 'type', 'type');
+        return $this->documentType();
     }
 }

@@ -20,19 +20,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', function (Request $request) {
         return $request->user()->load([
             'doctorAppointments.doctor',
-            //'patientAppointments.patient'
             'patientAppointments.doctor' //beteg tudjon orvoshoz időpontot foglalni
 
         ]);
     });
-});
-
-// Legacy doctor document routes kept for frontend compatibility.
-Route::middleware(['auth:sanctum', DoctorMW::class])->group(function () {
-    Route::get('/document-types', [DocumentController::class, 'documentTypes']);
-    Route::get('/document_types', [DocumentController::class, 'documentTypes']);
-    Route::get('/document-type', [DocumentController::class, 'documentTypes']);
-    Route::post('/documents', [DocumentController::class, 'upload']);
 });
 
 // Betegnek szóló csoport
@@ -54,49 +45,17 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         //beteg saját dokumentumai
         Route::get('/documents', [DocumentController::class, 'patientIndex']);
     });
-/*
-// Admin funkciók
-Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    //orvosok kilistázása funkcióhoz
-    Route::get('/doctors', [DoctorController::class, 'index']);
-    // Összes beteg listázása admin számára
-    Route::get('/patients', [PatientController::class, 'index']);
-});
-*/ 
-
-//prefixes megoldás, hogy ne írja felül egymást, ha ugyanazt a route-ot akarjuk használni
-Route::middleware(['auth:sanctum', AdminMW::class])
-    ->prefix('admin')
-    ->group(function () {
-
-        // admin összes felhasználó listája
-        Route::get('/users', [UserController::class, 'index']);
-        Route::get('/users/{id}', [UserController::class, 'show']);
-
-        // admin orvosok listája (külön útvonal!)
-        Route::get('/doctors', [DoctorController::class, 'index']);
-
-        // admin összes beteg listája
-        Route::get('/patients', [PatientController::class, 'index']);
-    });
 
 // Orvos funkciók
 Route::middleware(['auth:sanctum', DoctorMW::class])
-    ->prefix('doctor')
     ->group(function () {
         Route::get('/patients', [PatientController::class, 'doctorIndex']);
         Route::post('/patients', [PatientController::class, 'doctorStore']);
         Route::get('/patients/{id}', [PatientController::class, 'doctorShow']);
         // Dokumentum feltöltés
-        Route::get('/document-types', [DocumentController::class, 'documentTypes']);
         Route::get('/document_types', [DocumentController::class, 'documentTypes']);
-        Route::get('/document-type', [DocumentController::class, 'documentTypes']);
+        Route::get('/document_type', [DocumentController::class, 'documentTypes']);
         Route::post('/documents', [DocumentController::class, 'upload']);
-
         // Időpontok
         Route::get('/appointments', [AppointmentController::class, 'doctorIndex']);
-        // Recept CRUD
-        Route::apiResource('/prescriptions', PrescriptionController::class);
     });

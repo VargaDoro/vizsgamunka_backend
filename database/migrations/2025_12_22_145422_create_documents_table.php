@@ -22,7 +22,10 @@ return new class extends Migration
                 ->references('id')
                 ->on('users')
                 ->onDelete('cascade');
-            $table->string('type', 50);
+            $table->foreignId('document_type_id')
+                ->references('id')
+                ->on('document_types')
+                ->onDelete('cascade');
             $table->string('file_path', 255);
 
             // SQL: created_at DATETIME DEFAULT GETDATE()

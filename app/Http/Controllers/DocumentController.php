@@ -24,7 +24,6 @@ class DocumentController extends Controller
     public function upload(Request $request)
     {
         $request->merge([
-            // Backward compatibility for older frontend payload keys.
             'document_type_id' => $request->input('document_type_id', $request->input('type_id')),
             'taj' => $request->input('taj', $request->input('social_security_number')),
         ]);
@@ -32,13 +31,11 @@ class DocumentController extends Controller
         $validated = $request->validate([
             'file' => 'required|file|max:10240',
             'taj' => 'required|string|max:20',
-            'type' => 'nullable|string|max:50',
-            'document_type_id' => 'nullable|integer|exists:document_types,id',
+            'document_type_id' => 'required|integer|exists:document_types,id',
             'date' => 'nullable|date',
         ]);
 
-        $patient = User::where('role', 'patient')
-            ->where('social_security_number', $validated['taj'])
+        $patient = User::where('social_security_number', $validated['taj'])
             ->first();
 
         if (!$patient) {
@@ -47,25 +44,12 @@ class DocumentController extends Controller
             ], 422);
         }
 
-        $resolvedType = $validated['type'] ?? null;
-
-        if (!empty($validated['document_type_id'])) {
-            $docType = Document_type::find($validated['document_type_id']);
-            $resolvedType = $docType?->type;
-        }
-
-        if (!$resolvedType) {
-            return response()->json([
-                'message' => 'A dokumentum tipusa kotelezo (type vagy document_type_id).'
-            ], 422);
-        }
-
         $storedPath = $request->file('file')->store('documents', 'public');
 
         $document = Document::create([
             'doctor_id' => Auth::id(),
             'patient_id' => $patient->id,
-            'type' => $resolvedType,
+            'document_type_id' => $validated['document_type_id'],
             'file_path' => $storedPath,
             'created_at' => !empty($validated['date'])
                 ? Carbon::parse($validated['date'])
@@ -76,7 +60,7 @@ class DocumentController extends Controller
             'id' => $document->id,
             'doctor_id' => $document->doctor_id,
             'patient_id' => $document->patient_id,
-            'type' => $document->type,
+            'document_type_id' => $document->document_type_id,
             'file_path' => $document->file_path,
             'created_at' => $document->created_at,
         ], 201);
@@ -85,13 +69,13 @@ class DocumentController extends Controller
     public function patientIndex()
     {
         $patientId = Auth::id();
-        $documents = Document::with('doctor:id,name,email','type:id,type')
+        $documents = Document::with('doctor:id,name,email', 'documentType:id,type')
             ->where('patient_id', $patientId)
             ->get()
             ->map(fn($doc) => [
                 'id' => $doc->id,
                 'doctor_name' => $doc->doctor->name,
-                'type' => $doc->type?->type ?? $doc->type,
+                'type' => $doc->documentType?->type,
                 'created_at' => $doc->created_at,
             ]);
 
