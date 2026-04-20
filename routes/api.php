@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum', PatientMW::class])
 
 // Orvos funkciók
 Route::middleware(['auth:sanctum', DoctorMW::class])
+    ->prefix('doctor')
     ->group(function () {
         Route::get('/patients', [PatientController::class, 'doctorIndex']);
         Route::post('/patients', [PatientController::class, 'doctorStore']);
