@@ -27,11 +27,7 @@ return new class extends Migration
                 ->on('document_types')
                 ->onDelete('cascade');
             $table->string('file_path', 255);
-
-            // SQL: created_at DATETIME DEFAULT GETDATE()
-            $table->timestamp('created_at')->useCurrent();
-
-            // nincs updated_at az SQL-ben, ezért nem használunk timestamps()-et
+            $table->timestamps();
         });
     }
 

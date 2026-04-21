@@ -56,18 +56,6 @@ Route::middleware(['auth:sanctum', PatientMW::class])
         // adott dokumentum megjelenítése (a konkrét feltöltött pdf kép)
         Route::get('/documents/{id}/view', [DocumentController::class, 'view']);
     });
-/*
-// Admin funkciók
-Route::middleware(['auth:sanctum', AdminMW::class])->group(function () {
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    //orvosok kilistázása funkcióhoz
-    Route::get('/doctors', [DoctorController::class, 'index']);
-    // Összes beteg listázása admin számára
-    Route::get('/patients', [PatientController::class, 'index']);
-});
-*/ 
-
 //prefixes megoldás, hogy ne írja felül egymást, ha ugyanazt a route-ot akarjuk használni
 Route::middleware(['auth:sanctum', AdminMW::class])
     ->prefix('admin')
