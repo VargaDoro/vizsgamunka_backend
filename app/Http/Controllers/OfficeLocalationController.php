@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreOfficeLocalationRequest;
+use App\Http\Requests\UpdateOfficeLocalationRequest;
 use App\Models\OfficeLocation;
-use App\Http\Requests\StoreOfficeLocationRequest;
-use App\Http\Requests\UpdateOfficeLocationRequest;
 
 class OfficeLocationController extends Controller
 {
@@ -14,7 +14,7 @@ class OfficeLocationController extends Controller
         return response()->json($locations);
     }
 
-    public function store(StoreOfficeLocationRequest $request)
+    public function store(StoreOfficeLocalationRequest $request)
     {
         $location = new OfficeLocation();
         $location->fill($request->all());
@@ -27,7 +27,7 @@ class OfficeLocationController extends Controller
         return OfficeLocation::with('doctors')->findOrFail($id);
     }
 
-    public function update(UpdateOfficeLocationRequest $request, string $id)
+    public function update(UpdateOfficeLocalationRequest $request, string $id)
     {
         $location = OfficeLocation::findOrFail($id);
         $location->fill($request->all());

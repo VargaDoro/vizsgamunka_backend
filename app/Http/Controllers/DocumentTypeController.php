@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreDocument_typeRequest;
-use App\Http\Requests\UpdateDocument_typeRequest;
+use App\Http\Requests\StoreDocumentTypeRequest;
+use App\Http\Requests\UpdateDocumentTypeRequest;
 use App\Models\Document_type;
 
 class DocumentTypeController extends Controller
@@ -14,7 +14,7 @@ class DocumentTypeController extends Controller
         return response()->json($types);
     }
 
-    public function store(StoreDocument_typeRequest $request)
+    public function store(StoreDocumentTypeRequest $request)
     {
         $type = new Document_type();
         $type->fill($request->all());
@@ -27,7 +27,7 @@ class DocumentTypeController extends Controller
         return Document_type::with('documents')->findOrFail($id);
     }
 
-    public function update(UpdateDocument_typeRequest $request, string $id)
+    public function update(UpdateDocumentTypeRequest $request, string $id)
     {
         $type = Document_type::findOrFail($id);
         $type->fill($request->all());
