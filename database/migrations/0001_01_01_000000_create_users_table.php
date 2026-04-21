@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->string('license_number', 50)->nullable()->unique();
             $table->string('specialization', 100)->nullable();
-            $table->unsignedBigInteger('office_location_id')->nullable();
+            $table->foreignId('office_location_id')->nullable();
 
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -49,7 +49,7 @@ return new class extends Migration
             $table->string('phone_number', 20)->nullable();//orvosnak is kell legyen!!!
             $table->string('license_number', 50)->unique()->nullable(); //CSAK ORVOSS
             $table->string('specialization', 100)->nullable();  //CSAK ORVOSS
-            $table->unsignedBigInteger('office_location_id')->nullable(); //CSAK ORVOSS
+            $table->foreignId('office_location_id')->nullable(); //CSAK ORVOSS
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

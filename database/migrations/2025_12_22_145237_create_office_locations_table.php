@@ -17,6 +17,13 @@ return new class extends Migration
             $table->string('building', 50)->nullable();
             $table->timestamps();
         });
+
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreign('office_location_id')
+                ->references('id')
+                ->on('office_locations')
+                ->nullOnDelete();
+        });
     }
 
     /**
@@ -24,6 +31,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['office_location_id']);
+        });
+
         Schema::dropIfExists('office_locations');
     }
 };

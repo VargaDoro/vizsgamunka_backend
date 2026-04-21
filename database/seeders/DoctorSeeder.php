@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\OfficeLocation;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -16,6 +17,8 @@ class DoctorSeeder extends Seeder
 
    public function run(): void
     {
+        $officeLocationIds = OfficeLocation::query()->pluck('id')->values()->all();
+
         User::create([
             'name' => 'Dr. Kovács Béla',
             'email' => 'kovacs.bela@clinic.hu',
@@ -25,7 +28,7 @@ class DoctorSeeder extends Seeder
             'license_number' => 'LIC1001',
             'specialization' => 'Kardiológus',
             'phone_number' => '+36 30 123 4567',
-            'office_location_id' => 1,
+            'office_location_id' => $officeLocationIds[0] ?? null,
         ]);
 
         User::create([
@@ -37,7 +40,7 @@ class DoctorSeeder extends Seeder
             'license_number' => 'LIC1002',
             'specialization' => 'Bőrgyógyász',
             'phone_number' => '+36 30 987 6543',
-            'office_location_id' => 2,
+            'office_location_id' => $officeLocationIds[1] ?? null,
         ]);
 
         User::create([
@@ -49,7 +52,7 @@ class DoctorSeeder extends Seeder
             'license_number' => 'LIC1003',
             'specialization' => 'Pszichológus',
             'phone_number' => '+36 30 444 1122',
-            'office_location_id' => 3,
+            'office_location_id' => $officeLocationIds[2] ?? null,
         ]);
     }
 }

@@ -32,10 +32,10 @@ class DatabaseSeeder extends Seeder
   
         $this->call([
             UserSeeder::class,
+            OfficeLocationSeeder::class,
             DoctorSeeder::class,
             PatientSeeder::class,
             DocumentTypeSeeder::class,
-            OfficeLocationSeeder::class,
             AppointmentSeeder::class,
             PrescriptionSeeder::class,
             DocumentSeeder::class,
