@@ -91,18 +91,56 @@ public function patientIndex()
     return response()->json($documents);
 }
     
+public function doctorPatientDocuments($patientId)
+{
+    $patientId = (int)$patientId;
+    $doctorId = Auth::id();
+    
+    // Annak ellenőrzése, hogy az orvosnak jogosultsága van-e ehhez a pácienshez
+    $patient = User::find($patientId);
+    if (!$patient) {
+        return response()->json(['message' => 'Páciens nem található'], 404);
+    }
+
+    // Lekérjük az adott páciens ÖSSZES dokumentumát (debug: szűrés nélkül az orvos ID alapján)
+    $allDocuments = Document::with(['documentType:id,type'])
+        ->where('patient_id', $patientId)
+        ->orderByDesc('created_at')
+        ->get();
+
+    // Szűrjük csak az aktuális orvos dokumentumaira
+    $response = $allDocuments
+        ->where('doctor_id', $doctorId)
+        ->map(function ($doc) {
+            return [
+                'id' => $doc->id,
+                'type' => $doc->documentType?->type,
+                'created_at' => $doc->created_at,
+            ];
+        })
+        ->values();
+
+    return response()->json($response);
+}
+
 public function view($id)
 {
     if (!Auth::check()) {
         return response()->json(['message' => 'Unauthenticated'], 401);
     }
 
-    $document = Document::where('id', $id)
-        ->where('patient_id', Auth::id())
-        ->first();
+    $document = Document::find($id);
 
     if (!$document) {
         return response()->json(['message' => 'Not found'], 404);
+    }
+
+    // Ellenőrzés: vagy a páciens saját dokumentuma, vagy az orvos töltötte fel
+    $isPatient = $document->patient_id == Auth::id();
+    $isDoctor = $document->doctor_id == Auth::id();
+
+    if (!$isPatient && !$isDoctor) {
+        return response()->json(['message' => 'Unauthorized'], 403);
     }
 
     $path = Storage::disk('public')->path($document->file_path);

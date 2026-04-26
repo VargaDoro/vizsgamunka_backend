@@ -79,6 +79,8 @@ Route::middleware(['auth:sanctum', DoctorMW::class])
         Route::get('/patients', [PatientController::class, 'doctorIndex']);
         Route::post('/patients', [PatientController::class, 'doctorStore']);
         Route::get('/patients/{id}', [PatientController::class, 'doctorShow']);
+        Route::get('/patients/{id}/documents', [DocumentController::class, 'doctorPatientDocuments']);
+        Route::get('/documents/{id}/view', [DocumentController::class, 'view']);
         // Dokumentum feltöltés
         Route::get('/document-types', [DocumentController::class, 'documentTypes']);
         Route::get('/document_types', [DocumentController::class, 'documentTypes']);
